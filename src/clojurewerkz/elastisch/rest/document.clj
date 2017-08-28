@@ -200,6 +200,13 @@
    (doc/search conn \"people\" \"person\" :query (q/prefix :username \"appl\"))"
   [^Connection conn index mapping-type & args]
   (let [opts (ar/->opts args)
+        async? (:async? opts)
+        respond (:respond opts)
+        raise (:raise opts)
+        opts (dissoc opts
+                     :async?
+                     :respond
+                     :raise)
         qk   [:search_type :scroll :routing :preference :ignore_unavailable]
         qp   (select-keys opts qk)
         body (apply dissoc (concat [opts] qk))]
@@ -207,7 +214,10 @@
                                      (join-names index)
                                      (join-names mapping-type))
                {:body body
-                :query-params qp})))
+                :query-params qp
+                :async? async?
+                :respond respond
+                :raise raise})))
 
 (defn search-all-types
   "Performs a search query across one or more indexes and all mapping types."
